@@ -2,12 +2,11 @@
 
 import { TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { IFormFieldProps } from '../UseFormHandler';
+import { NumberType } from '../../../form-kit/FormKit';
+import { IFormFieldProps } from '../../../form-kit/UseFormHandler';
 import { InputWrapper } from './InputWrapper';
 
-export function IntegerAdapter<T extends number | null | undefined>(
-  props: IFormFieldProps<T>
-) {
+export function IntegerAdapter(props: IFormFieldProps<NumberType>) {
   const [value, setValue] = useState('');
 
   useEffect(() => {
@@ -19,6 +18,9 @@ export function IntegerAdapter<T extends number | null | undefined>(
   return (
     <InputWrapper {...props}>
       <TextField
+        label={props.label}
+        helperText={props.description}
+        required={props.required}
         error={props.error !== undefined}
         fullWidth
         placeholder={props.placeholder}
@@ -28,10 +30,10 @@ export function IntegerAdapter<T extends number | null | undefined>(
 
           const parsed = parseInt(e.target.value);
           if (Number.isSafeInteger(parsed)) {
-            props.onChangeValue(parsed as T);
+            props.onChangeValue(parsed);
             return;
           }
-          props.onChangeValue(NaN as T);
+          props.onChangeValue(NaN);
         }}
       />
     </InputWrapper>
