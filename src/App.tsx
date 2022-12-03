@@ -26,14 +26,8 @@ const testSchema = object({
 function App() {
   const form = useForm(
     testSchema,
-    // TODO: change to partial
     {
-      name: '',
-      age: undefined,
-      email: undefined,
-      website: undefined,
-      // TODO: auto get default in useForm hook
-      dob: testSchema.getDefault().dob,
+      name: 'John',
     },
     async (v) => {
       await delay(1000);
