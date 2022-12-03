@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import lodash from 'lodash';
+import { useMemo, useState } from 'react';
 import { InferType } from 'yup';
 import { ObjectShape, OptionalObjectSchema } from 'yup/lib/object';
 import BaseSchema from 'yup/lib/schema';
@@ -33,26 +34,35 @@ interface IFormHandler<Structure, ErrorStructure> {
 
 export function useFormHandler<T extends ObjectShape>(
   schema: OptionalObjectSchema<T>,
-  initial: InferType<OptionalObjectSchema<T>>,
+  initial: Partial<InferType<OptionalObjectSchema<T>>>,
   onSubmit: (v: InferType<OptionalObjectSchema<T>>) => Promise<void>
 ): IFormHandler<InferType<OptionalObjectSchema<T>>, ValidationError[]> {
-  const [form, setForm] = useState<InferType<OptionalObjectSchema<T>>>(initial);
-  const [formErrors, setFormErrors] = useState<ValidationError[]>();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      let errors: ValidationError | undefined = undefined;
-      await schema
-        .validate(form, { abortEarly: false })
-        .catch((err) => (errors = err));
-      setFormErrors((errors as ValidationError | undefined)?.inner);
-    })();
+  // Merge default form value and initial form value
+  const defaultForm = useMemo(() => {
+    return lodash.merge(schema.getDefault(), initial);
+  }, [schema, initial]);
+
+  // Set default form value
+  const [form, setForm] =
+    useState<InferType<OptionalObjectSchema<T>>>(defaultForm);
+
+  // Capture YUP validation errors
+  const errors = useMemo(() => {
+    try {
+      schema.validateSync(form, { abortEarly: false });
+    } catch (errors) {
+      const casted = errors as ValidationError;
+      return casted.inner;
+    }
+    return [];
   }, [form]);
 
+  // Evaluate if form is valid
   const isValid = useMemo(() => {
-    return !(formErrors ?? []).some((err) => err.errors.length > 0);
-  }, [formErrors]);
+    return !errors.some((err) => err.errors.length > 0);
+  }, [errors]);
 
   const fields = useMemo(() => {
     // TODO: clean this up
@@ -63,7 +73,7 @@ export function useFormHandler<T extends ObjectShape>(
     };
     Object.keys(schema.fields).forEach((k) => {
       const key = k as keyof InferType<OptionalObjectSchema<T>>;
-      const error = formErrors
+      const error = errors
         ?.find((err) => err.path === k)
         ?.errors.find(() => true);
       const schemaField: BaseSchema<unknown> = schema.fields[
@@ -73,7 +83,6 @@ export function useFormHandler<T extends ObjectShape>(
       const { description = '', placeholder = '' } =
         schemaField.spec?.meta ?? {};
 
-      console.log(schemaField);
       fields[key] = {
         label: schemaField.spec?.label,
         error: error,
@@ -85,8 +94,9 @@ export function useFormHandler<T extends ObjectShape>(
       };
     });
     return fields;
-  }, [formErrors, form]);
+  }, [errors, form]);
 
+  // Create props for submission button widget
   const submitButtonProps: IFormSubmitButtonProps = {
     onClick: async () => {
       if (!isValid) {
@@ -103,7 +113,7 @@ export function useFormHandler<T extends ObjectShape>(
   return {
     state: form,
     setState: setForm,
-    errors: formErrors,
+    errors: errors,
     isValid: isValid,
     fields: fields,
     submitButtonProps: submitButtonProps,
