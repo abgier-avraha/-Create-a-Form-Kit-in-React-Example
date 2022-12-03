@@ -62,24 +62,26 @@ export function useForm<T extends ObjectShape>(
     };
     Object.keys(schema.fields).forEach((k) => {
       const key = k as keyof InferType<OptionalObjectSchema<T>>;
+      // TODO: key is not always the path like in nested fields
       const error = errors
         ?.find((err) => err.path === k)
         ?.errors.find(() => true);
-      const schemaField: BaseSchema<unknown> = schema.fields[
+      // TODO: remove casting and figure out why fields like 'spec' are not accessible statically
+      const fieldSchema: BaseSchema<unknown> = schema.fields[
         key
-      ] as unknown as BaseSchema<unknown>;
+      ] as BaseSchema<unknown>;
 
       const { description = '', placeholder = '' } =
-        schemaField.spec?.meta ?? {};
+        fieldSchema.spec?.meta ?? {};
 
       fields[key] = {
-        label: schemaField.spec?.label,
+        label: fieldSchema.spec?.label,
         error: error,
         value: form[key] as unknown as any,
-        onChangeValue: (value: unknown) => setForm({ ...form, [key]: value }),
+        onChangeValue: (value) => setForm({ ...form, [key]: value }),
         description: description,
         placeholder: placeholder,
-        required: schemaField.spec.presence === 'required',
+        required: fieldSchema.spec.presence === 'required',
       };
     });
     return fields;
