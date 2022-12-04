@@ -4,7 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import { Container, Stack } from '@mui/system';
 import { date, number, object, string } from 'yup';
 import { useFormKit } from './form-kit/FormKit';
-import { useForm } from './form-kit/UseFormHandler';
+import { useForm } from './form-kit/useForm';
 
 const testSchema = object({
   name: string().label('Name').required(),
@@ -26,7 +26,8 @@ const testSchema = object({
     .url(),
   dob: date()
     .label('Date of Birth')
-    .default(() => new Date('01 January 1990 00:00 UTC')),
+    .default(() => new Date('01 January 1990 00:00 UTC'))
+    .required(),
   founded: date()
     .label('Founding Date')
     .meta({
@@ -44,6 +45,9 @@ function App() {
     async (v) => {
       await delay(1000);
       console.log(v);
+    },
+    (error) => {
+      console.error('Submission failed', error);
     }
   );
   const { FormKit } = useFormKit();
@@ -51,7 +55,7 @@ function App() {
   return (
     <Container>
       <Stack gap={2}>
-        <Typography variant="h1">Form Test</Typography>
+        <Typography variant="h2">Form Test</Typography>
         <Stack gap={2}>
           <Stack direction="row" gap={2}>
             <FormKit.Text {...form.fields.name} />

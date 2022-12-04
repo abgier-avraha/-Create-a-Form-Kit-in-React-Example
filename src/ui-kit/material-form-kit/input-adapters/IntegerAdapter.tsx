@@ -3,7 +3,7 @@
 import { TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { NumberType } from '../../../form-kit/FormKit';
-import { IFormFieldProps } from '../../../form-kit/UseFormHandler';
+import { IFormFieldProps } from '../../../form-kit/useForm';
 import { InputWrapper } from './InputWrapper';
 
 export function IntegerAdapter(props: IFormFieldProps<NumberType>) {
@@ -21,19 +21,20 @@ export function IntegerAdapter(props: IFormFieldProps<NumberType>) {
         label={props.label}
         helperText={props.description}
         required={props.required}
+        disabled={props.disabled}
         error={props.error !== undefined}
         fullWidth
         placeholder={props.placeholder}
         value={value}
+        type="number"
         onChange={(e) => {
           setValue(e.target.value);
-
           const parsed = parseInt(e.target.value);
           if (Number.isSafeInteger(parsed)) {
             props.onChangeValue(parsed);
             return;
           }
-          props.onChangeValue(NaN);
+          props.onChangeValue(undefined);
         }}
       />
     </InputWrapper>

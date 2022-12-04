@@ -1,11 +1,11 @@
 import { LoadingButton } from '@mui/lab';
-import { IFormSubmitButtonProps } from '../../../form-kit/UseFormHandler';
+import { IFormSubmitButtonProps } from '../../../form-kit/useForm';
 
 export const SubmitButtonAdapter = (props: IFormSubmitButtonProps) => {
   return (
     <LoadingButton
       loading={props.loading}
-      disabled={props.disabled}
+      disabled={!props.isFormValid}
       variant="contained"
       onClick={props.onClick}
       size="large"

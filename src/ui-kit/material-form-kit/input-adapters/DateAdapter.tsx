@@ -3,7 +3,7 @@
 import { TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { DateType } from '../../../form-kit/FormKit';
-import { IFormFieldProps } from '../../../form-kit/UseFormHandler';
+import { IFormFieldProps } from '../../../form-kit/useForm';
 import { InputWrapper } from './InputWrapper';
 
 export function DateAdapter(props: IFormFieldProps<DateType>) {
@@ -12,6 +12,7 @@ export function DateAdapter(props: IFormFieldProps<DateType>) {
       <DatePicker
         label={props.label}
         value={props.value !== undefined ? props.value : null}
+        disabled={props.disabled}
         onChange={(newValue) => {
           props.onChangeValue(newValue);
         }}

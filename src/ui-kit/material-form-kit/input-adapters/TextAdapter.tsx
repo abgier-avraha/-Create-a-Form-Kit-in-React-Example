@@ -2,7 +2,7 @@
 
 import { TextField } from '@mui/material';
 import { StringType } from '../../../form-kit/FormKit';
-import { IFormFieldProps } from '../../../form-kit/UseFormHandler';
+import { IFormFieldProps } from '../../../form-kit/useForm';
 import { InputWrapper } from './InputWrapper';
 
 export function TextAdapter(props: IFormFieldProps<StringType>) {
@@ -13,6 +13,7 @@ export function TextAdapter(props: IFormFieldProps<StringType>) {
         helperText={props.description}
         required={props.required}
         error={props.error !== undefined}
+        disabled={props.disabled}
         fullWidth
         placeholder={props.placeholder}
         value={props.value}

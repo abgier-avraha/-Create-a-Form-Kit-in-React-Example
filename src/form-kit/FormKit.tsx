@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { IFormFieldProps, IFormSubmitButtonProps } from './UseFormHandler';
+import { IFormFieldProps, IFormSubmitButtonProps } from './useForm';
 
 export type StringType = string | null | undefined;
 export type NumberType = number | null | undefined;
