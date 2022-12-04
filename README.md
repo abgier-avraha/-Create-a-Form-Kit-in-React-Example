@@ -62,3 +62,7 @@ function App() {
   );
 }
 ```
+
+## Template Information
+
+Created using this template: https://github.com/jsjoeio/react-ts-vitest-template
