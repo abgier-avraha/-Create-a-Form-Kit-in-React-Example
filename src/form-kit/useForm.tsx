@@ -50,14 +50,10 @@ export function useForm<T extends ObjectShape>(
   // Loading state for form submission Promise
   const [loading, setLoading] = useState(false);
 
-  // Merge default form value and initial form value
-  const defaultForm = useMemo(() => {
-    return lodash.merge(schema.getDefault(), initial);
-  }, [schema, initial]);
-
-  // Set default form value
-  const [form, setForm] =
-    useState<Partial<InferType<OptionalObjectSchema<T>>>>(defaultForm);
+  // Set default form value by merging default object with initial values
+  const [form, setForm] = useState<Partial<InferType<OptionalObjectSchema<T>>>>(
+    lodash.merge(schema.getDefault(), initial)
+  );
 
   // Capture validation errors
   const errors = useMemo(() => {

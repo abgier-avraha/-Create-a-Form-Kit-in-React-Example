@@ -1,15 +1,64 @@
-# React Testing with React Context
+# Create a Form Kit in React Example
 
-A template which uses the following stack:
+## Provide a Form UI Kit
 
-## Template Information
+```tsx
+<FormKitProvider kit={MaterialFormKit}>
+  <App />
+</FormKitProvider>
+```
 
-Created using this template: https://github.com/jsjoeio/react-ts-vitest-template
+## Create a Schema
 
-Utilises
+```tsx
+const schema = object({
+  name: string().label('Name').required(),
+  age: number().label('Age').required().positive().integer(),
+  email: string()
+    .label('Email')
+    .meta({
+      description: 'Your personal email.',
+    })
+    .required()
+    .email(),
+});
+```
 
-- React
-- TypeScript
-- Vite
-- Vitest
-- React Testing Library
+## Render Your Form in Your Layout of Choice
+
+```tsx
+function App() {
+  const form = useForm(
+    schema,
+    {
+      name: 'John',
+    },
+    async (v) => {
+      console.log('Submitting...', v);
+    },
+    (error) => {
+      console.error('Submission failed', error);
+    }
+  );
+  const { FormKit } = useFormKit();
+
+  return (
+    <Container>
+      <Stack gap={2}>
+        <Typography variant="h2">Form Test</Typography>
+        <Stack gap={2}>
+          <Stack direction="row" gap={2}>
+            <FormKit.Text {...form.fields.name} />
+            <FormKit.Integer {...form.fields.age} />
+          </Stack>
+          <FormKit.Text {...form.fields.email} />
+          <FormKit.Text {...form.fields.website} />
+          <FormKit.Date {...form.fields.dob} />
+          <FormKit.Date {...form.fields.founded} />
+          <FormKit.SubmitButton {...form.submitButtonProps} />
+        </Stack>
+      </Stack>
+    </Container>
+  );
+}
+```
