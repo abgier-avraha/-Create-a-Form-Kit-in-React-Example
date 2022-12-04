@@ -45,7 +45,7 @@ export function useForm<T extends ObjectShape>(
   schema: OptionalObjectSchema<T>,
   initial: Partial<InferType<OptionalObjectSchema<T>>>,
   onSubmit: (v: InferType<OptionalObjectSchema<T>>) => Promise<void>,
-  onSubmissionError: (error: any) => void
+  onSubmissionError?: (error: Error) => void
 ): IFormHook<T> {
   // Loading state for form submission Promise
   const [loading, setLoading] = useState(false);
@@ -88,7 +88,7 @@ export function useForm<T extends ObjectShape>(
         try {
           await onSubmit(form);
         } catch (error: any) {
-          onSubmissionError(error);
+          onSubmissionError && onSubmissionError(error);
         } finally {
           setLoading(false);
         }
