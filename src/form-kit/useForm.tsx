@@ -45,20 +45,20 @@ export function useForm<T extends ObjectShape>(
   const [loading, setLoading] = useState(false);
 
   // Set default form value by merging default object with initial values
-  const [form, setForm] = useState<Partial<InferType<OptionalObjectSchema<T>>>>(
-    lodash.merge(schema.getDefault(), initial)
-  );
+  const [value, setValue] = useState<
+    Partial<InferType<OptionalObjectSchema<T>>>
+  >(lodash.merge(schema.getDefault(), initial));
 
   // Capture validation errors
   const errors = useMemo(() => {
     try {
-      schema.validateSync(form, { abortEarly: false });
+      schema.validateSync(value, { abortEarly: false });
     } catch (errors) {
       const casted = errors as ValidationError;
       return casted.inner;
     }
     return [];
-  }, [form]);
+  }, [value]);
 
   // Evaluate if form is valid
   const isValid = useMemo(() => {
@@ -66,17 +66,17 @@ export function useForm<T extends ObjectShape>(
   }, [errors]);
 
   const fields = useMemo(
-    () => getFields(schema, form, errors, setForm),
-    [errors, form]
+    () => getFields(schema, value, errors, setValue),
+    [errors, value]
   );
 
   // Create props for submission button widget
   const submitButton: IFormSubmitButtonProps = {
     onClick: async () => {
-      if (isValidForm(form, isValid)) {
+      if (isValidForm(value, isValid)) {
         setLoading(true);
         try {
-          await onSubmit(form);
+          await onSubmit(value);
         } catch (error: any) {
           onSubmissionError && onSubmissionError(error);
         } finally {
@@ -89,8 +89,8 @@ export function useForm<T extends ObjectShape>(
   };
 
   return {
-    state: form,
-    setState: setForm,
+    state: value,
+    setState: setValue,
     errors: errors,
     isValid: isValid,
     fields: fields,
