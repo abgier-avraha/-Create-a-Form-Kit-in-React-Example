@@ -16,7 +16,7 @@ export function TextAdapter(props: IFormFieldProps<StringType>) {
         disabled={props.disabled}
         fullWidth
         placeholder={props.placeholder}
-        value={props.value}
+        value={props.value ?? ''}
         onChange={(e) => props.onChangeValue(e.target.value)}
       />
     </InputWrapper>

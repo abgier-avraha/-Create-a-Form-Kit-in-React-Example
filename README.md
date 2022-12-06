@@ -55,7 +55,7 @@ function App() {
           <FormKit.Text {...form.fields.website} />
           <FormKit.Date {...form.fields.dob} />
           <FormKit.Date {...form.fields.founded} />
-          <FormKit.SubmitButton {...form.submitButtonProps} />
+          <FormKit.SubmitButton {...form.submitButton} />
         </Stack>
       </Stack>
     </Container>

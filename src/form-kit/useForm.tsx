@@ -24,13 +24,7 @@ export interface IFormSubmitButtonProps {
 
 interface IFormHook<T extends ObjectShape> {
   state: Partial<InferType<OptionalObjectSchema<T>>>;
-  setState: (
-    v:
-      | Partial<InferType<OptionalObjectSchema<T>>>
-      | ((
-          curState: Partial<InferType<OptionalObjectSchema<T>>>
-        ) => Partial<InferType<OptionalObjectSchema<T>>>)
-  ) => void;
+  setState: (v: Partial<InferType<OptionalObjectSchema<T>>>) => void;
   errors: ValidationError[];
   isValid: boolean;
   fields: {
@@ -38,7 +32,7 @@ interface IFormHook<T extends ObjectShape> {
       InferType<OptionalObjectSchema<T>>[Property]
     >;
   };
-  submitButtonProps: IFormSubmitButtonProps;
+  submitButton: IFormSubmitButtonProps;
 }
 
 export function useForm<T extends ObjectShape>(
@@ -77,7 +71,7 @@ export function useForm<T extends ObjectShape>(
   );
 
   // Create props for submission button widget
-  const submitButtonProps: IFormSubmitButtonProps = {
+  const submitButton: IFormSubmitButtonProps = {
     onClick: async () => {
       if (isValidForm(form, isValid)) {
         setLoading(true);
@@ -100,7 +94,7 @@ export function useForm<T extends ObjectShape>(
     errors: errors,
     isValid: isValid,
     fields: fields,
-    submitButtonProps: submitButtonProps,
+    submitButton: submitButton,
   };
 }
 
@@ -114,52 +108,43 @@ interface IFieldInfo {
 }
 
 // Does not support getting fields within objects
-function getFieldSchemas<T extends ObjectShape>(
-  schema: OptionalObjectSchema<T>
-) {
-  const fieldInfo: IFieldInfo[] = [];
-
-  Object.keys(schema.fields).forEach((k) => {
-    fieldInfo.push({
-      key: k,
-      schema: schema.fields[k] as BaseSchema<unknown>,
-    });
-  });
-
-  return fieldInfo;
-}
-
 function getFields<T extends ObjectShape>(
   schema: OptionalObjectSchema<T>,
   form: Partial<InferType<OptionalObjectSchema<T>>>,
   errors: ValidationError[],
   setForm: (v: Partial<InferType<OptionalObjectSchema<T>>>) => void
 ) {
-  const fields = {} as {
+  // Use the reduce method to create an object containing the properties for each form field
+  const initial = {} as {
     [Property in keyof InferType<OptionalObjectSchema<T>>]: IFormFieldProps<
       InferType<OptionalObjectSchema<T>>[Property]
     >;
   };
 
-  const fieldSchemas = getFieldSchemas(schema);
+  return Object.keys(schema.fields).reduce((acc, key) => {
+    // Does not support nesting
+    const error = errors?.find((err) => err.path === key);
 
-  fieldSchemas.forEach((f) => {
-    const key = f.key as keyof InferType<OptionalObjectSchema<T>>;
+    const fieldSchema: BaseSchema<unknown> = schema.fields[
+      key
+    ] as BaseSchema<unknown>;
 
-    const validationError = errors?.find((err) => err.path === f.key);
+    const { description = '', placeholder = '' } = fieldSchema.spec?.meta ?? {};
 
-    const { description = '', placeholder = '' } = f.schema.spec?.meta ?? {};
-
-    fields[key] = {
-      label: f.schema.spec?.label,
+    // Add the field properties to the accumulator object
+    const fieldProps: IFormFieldProps<any> = {
+      label: fieldSchema.spec?.label,
+      error: error,
+      value: form[key as keyof InferType<OptionalObjectSchema<T>>],
+      onChangeValue: (value) => setForm({ ...form, [key]: value }),
       description: description,
       placeholder: placeholder,
-      value: form[key] as any,
-      error: validationError,
-      required: f.schema.spec.presence === 'required',
-      onChangeValue: (value) => setForm({ ...form, [key]: value }),
+      required: fieldSchema.spec.presence === 'required',
     };
-  });
 
-  return fields;
+    return {
+      ...acc,
+      [key as keyof InferType<OptionalObjectSchema<T>>]: fieldProps,
+    };
+  }, initial);
 }
