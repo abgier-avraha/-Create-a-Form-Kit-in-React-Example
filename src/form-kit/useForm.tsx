@@ -102,11 +102,6 @@ function isValidForm<T>(value: Partial<T>, isValid: boolean): value is T {
   return isValid;
 }
 
-interface IFieldInfo {
-  key: string;
-  schema: BaseSchema<unknown>;
-}
-
 // Does not support getting fields within objects
 function getFields<T extends ObjectShape>(
   schema: OptionalObjectSchema<T>,
