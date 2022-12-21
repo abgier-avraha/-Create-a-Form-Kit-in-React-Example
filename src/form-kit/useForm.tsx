@@ -1,5 +1,5 @@
 import lodash from 'lodash';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { InferType } from 'yup';
 import { ObjectShape, OptionalObjectSchema } from 'yup/lib/object';
 import BaseSchema from 'yup/lib/schema';
@@ -71,22 +71,27 @@ export function useForm<T extends ObjectShape>(
   );
 
   // Create props for submission button widget
-  const submitButton: IFormSubmitButtonProps = {
-    onClick: async () => {
-      if (isValidForm(value, isValid)) {
-        setLoading(true);
-        try {
-          await onSubmit(value);
-        } catch (error: any) {
-          onSubmissionError && onSubmissionError(error);
-        } finally {
-          setLoading(false);
-        }
+  const onClickSubmit = useCallback(async () => {
+    if (isValidForm(value, isValid)) {
+      setLoading(true);
+      try {
+        await onSubmit(value);
+      } catch (error: any) {
+        onSubmissionError && onSubmissionError(error);
+      } finally {
+        setLoading(false);
       }
-    },
-    loading: loading,
-    isFormValid: isValid,
-  };
+    }
+  }, [value, isValid, onSubmissionError]);
+
+  const submitButton: IFormSubmitButtonProps = useMemo(
+    () => ({
+      onClick: onClickSubmit,
+      loading: loading,
+      isFormValid: isValid,
+    }),
+    [onClickSubmit, loading, isValid]
+  );
 
   return {
     state: value,
