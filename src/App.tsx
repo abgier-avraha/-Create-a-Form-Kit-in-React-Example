@@ -1,77 +1,46 @@
-import { Typography } from '@mui/material';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import { Container, Stack } from '@mui/system';
-import { date, number, object, string } from 'yup';
-import { useFormKit } from './form-kit/FormKit';
-import { useForm } from './form-kit/useForm';
+import { person } from '@jsonforms/examples';
+import {
+  materialCells,
+  materialRenderers,
+} from '@jsonforms/material-renderers';
+import { JsonForms } from '@jsonforms/react';
+import { Card, CardContent, Container, Typography } from '@mui/material';
+import { Stack } from '@mui/system';
+import { ErrorObject } from 'ajv';
+import { useState } from 'react';
 
-const testSchema = object({
-  name: string().label('Name').required(),
-  age: number().label('Age').required().positive().integer(),
-  email: string()
-    .label('Email')
-    .meta({
-      description: 'Your personal email.',
-    })
-    .required()
-    .email(),
-  website: string()
-    .label('Website')
-    .meta({
-      description: 'Your personal website.',
-      placeholder: 'https://my-site.com',
-    })
-    .notRequired()
-    .url(),
-  dob: date()
-    .label('Date of Birth')
-    .default(() => new Date('01 January 1990 00:00 UTC'))
-    .required(),
-  founded: date()
-    .label('Founding Date')
-    .meta({
-      description: 'The date the residence was founded.',
-    })
-    .required(),
-});
+const { schema, uischema, data: initialData } = person;
+
+// TODO: replace all material ui elements in node_modules/@jsonforms/material-renderers with react-native-paper
+
+// TODO: how to make a form creator where you can
+// - Select a widget to drag and drop
+// - Edit the title
+// - Edit the description
+// - Decide the UI Schema for an element ref
 
 function App() {
-  const form = useForm(
-    testSchema,
-    {
-      name: 'John',
-    },
-    async (v) => {
-      await delay(1000);
-      console.log(v);
-    },
-    (error) => {
-      console.error('Submission failed', error);
-    }
-  );
-  const { FormKit } = useFormKit();
+  const [data, setData] = useState<object>(initialData);
+  const [errors, setErrors] = useState<ErrorObject[] | undefined>();
 
   return (
     <Container>
-      <Stack gap={2}>
-        <Typography variant="h2">Form Test</Typography>
-        <Stack gap={2}>
-          <Stack direction="row" gap={2}>
-            <FormKit.Text {...form.fields.name} />
-            <FormKit.Integer {...form.fields.age} />
-          </Stack>
-          <FormKit.Text {...form.fields.email} />
-          <FormKit.Text {...form.fields.website} />
-          <FormKit.Date {...form.fields.dob} />
-          <FormKit.Date {...form.fields.founded} />
-          <FormKit.SubmitButton {...form.submitButton} />
-        </Stack>
+      <Stack gap={4}>
+        <Typography variant="h4">JSON Forms Test</Typography>
+        <JsonForms
+          schema={schema}
+          uischema={uischema}
+          data={data}
+          renderers={materialRenderers}
+          cells={materialCells}
+          onChange={({ data, errors }) => {
+            setData(data);
+            setErrors(errors);
+          }}
+        />
 
-        <Stack gap={1}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Debug
-          </Typography>
+        <Stack gap={2}>
+          <Typography variant="h5">Debug</Typography>
           <Card>
             <CardContent>
               <Typography
@@ -82,7 +51,7 @@ function App() {
                 Value
               </Typography>
               <Typography fontFamily="courier" variant="subtitle1">
-                {JSON.stringify(form.state)}
+                {JSON.stringify(data)}
               </Typography>
             </CardContent>
           </Card>
@@ -96,7 +65,35 @@ function App() {
                 Errors
               </Typography>
               <Typography fontFamily="courier" variant="subtitle1">
-                {JSON.stringify(form.errors)}
+                {JSON.stringify(errors)}
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <Typography
+                sx={{ fontSize: 14 }}
+                color="text.secondary"
+                gutterBottom
+              >
+                Schema
+              </Typography>
+              <Typography fontFamily="courier" variant="subtitle1">
+                {JSON.stringify(schema)}
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <Typography
+                sx={{ fontSize: 14 }}
+                color="text.secondary"
+                gutterBottom
+              >
+                UI Schema
+              </Typography>
+              <Typography fontFamily="courier" variant="subtitle1">
+                {JSON.stringify(uischema)}
               </Typography>
             </CardContent>
           </Card>
@@ -105,9 +102,4 @@ function App() {
     </Container>
   );
 }
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export default App;
